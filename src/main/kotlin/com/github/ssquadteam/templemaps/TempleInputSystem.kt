@@ -17,10 +17,10 @@ import java.awt.event.KeyEvent
 import kotlin.math.abs
 
 /**
- * Input system for TempleMaps - maps Hytale player input to TempleOS.
+ * Input system for TempleMaps - maps Hytale player input to x86 emulator.
  *
- * Hotbar Slot Modes (0-7):
- * 0 - Mouse Mode: WASD = mouse movement, Jump = left click
+ * Hotbar Slot Modes (0-8):
+ * 0 - Mouse Mode (Fast): WASD = mouse movement, Jump = left click
  * 1 - Arrow Keys: WASD = arrows, Jump = Enter
  * 2 - System Keys: W=ESC, A=F1, S=F5, D=Menu (F10)
  * 3 - Window Management: W=Alt+M, A=Alt+V, S=Alt+H, D=Ctrl+Alt+N, Jump=Ctrl+B
@@ -28,6 +28,7 @@ import kotlin.math.abs
  * 5 - Terminal: W=Ctrl+Alt+T, A=Tab, S=Shift+Tab, D=Ctrl+M, Jump=Enter
  * 6 - Text Nav: W=PageUp, A=Home, S=PageDown, D=End, Jump=Space
  * 7 - Modifiers: W=Shift, A=Ctrl, S=Alt, D=ReleaseAll, Jump=RightClick
+ * 8 - Mouse Mode (Slow): WASD = slow mouse for micro adjustments, Jump = left click
  */
 class TempleInputSystem : EntityTickingSystem<EntityStore>() {
 
@@ -166,12 +167,13 @@ class TempleInputSystem : EntityTickingSystem<EntityStore>() {
             5 -> engine.pressEnter()               // Terminal: Enter
             6 -> engine.pressSpace()               // Text nav: Space/Select
             7 -> engine.mouseRightClick()          // Modifiers: Right click
+            8 -> engine.mouseLeftClick()           // Slow mouse: left click
         }
     }
 
     private fun handleWASD(engine: TempleEngine, slot: Int, w: Boolean, a: Boolean, s: Boolean, d: Boolean) {
         when (slot) {
-            0 -> handleMouseMode(engine, w, a, s, d)
+            0 -> handleMouseMode(engine, w, a, s, d, slow = false)
             1 -> handleArrowMode(engine, w, a, s, d)
             2 -> handleSystemMode(engine, w, a, s, d)
             3 -> handleWindowMode(engine, w, a, s, d)
@@ -179,11 +181,13 @@ class TempleInputSystem : EntityTickingSystem<EntityStore>() {
             5 -> handleTerminalMode(engine, w, a, s, d)
             6 -> handleTextNavMode(engine, w, a, s, d)
             7 -> handleModifierMode(engine, w, a, s, d)
+            8 -> handleMouseMode(engine, w, a, s, d, slow = true)
         }
     }
 
-    // Slot 0: Mouse Mode - WASD moves cursor
-    private fun handleMouseMode(engine: TempleEngine, w: Boolean, a: Boolean, s: Boolean, d: Boolean) {
+    // Slot 0: Mouse Mode - WASD moves cursor (fast)
+    // Slot 8: Slow Mouse Mode - WASD moves cursor (slow for micro adjustments)
+    private fun handleMouseMode(engine: TempleEngine, w: Boolean, a: Boolean, s: Boolean, d: Boolean, slow: Boolean) {
         val dx = when {
             a && !d -> -1
             d && !a -> 1
@@ -195,7 +199,7 @@ class TempleInputSystem : EntityTickingSystem<EntityStore>() {
             else -> 0
         }
         if (dx != 0 || dy != 0) {
-            engine.moveMouse(dx, dy, false)
+            engine.moveMouse(dx, dy, slow)
         }
     }
 

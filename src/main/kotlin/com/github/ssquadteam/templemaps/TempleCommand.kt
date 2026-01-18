@@ -177,8 +177,8 @@ class TempleCommand : TaleCommand("temple", "Run x86 OSes on the world map") {
 
             TempleMapsPlugin.instance.addPlayer(player)
             ctx.reply("Joined! Open your map (M) to view.".success())
-            ctx.reply("Controls (change mode via hotbar slots 1-8):".info())
-            ctx.reply("  Slot 1: Mouse Mode - WASD moves cursor, Jump clicks".muted())
+            ctx.reply("Controls (change mode via hotbar slots 1-9):".info())
+            ctx.reply("  Slot 1: Mouse (Fast) - WASD moves cursor, Jump clicks".muted())
             ctx.reply("  Slot 2: Arrow Keys - WASD = arrows, Jump = Enter".muted())
             ctx.reply("  Slot 3: System - W=ESC, A=F1, S=F5, D=Menu".muted())
             ctx.reply("  Slot 4: Windows - Maximize, Tile, Next Window".muted())
@@ -186,6 +186,7 @@ class TempleCommand : TaleCommand("temple", "Run x86 OSes on the world map") {
             ctx.reply("  Slot 6: Terminal - New Terminal, Tab".muted())
             ctx.reply("  Slot 7: Text Nav - PageUp/Down, Home/End".muted())
             ctx.reply("  Slot 8: Modifiers - Toggle Shift/Ctrl/Alt".muted())
+            ctx.reply("  Slot 9: Mouse (Slow) - Micro adjustments, Jump clicks".muted())
         }
     }
 

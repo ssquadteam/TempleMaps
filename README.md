@@ -36,13 +36,13 @@ TempleMaps uses the h0MER247 JPC emulator - a pure Java implementation of an x86
 | FreeDOS | .img/.iso | 64MB | Lightweight |
 | Other x86 | .img/.iso | 256MB | YMMV |
 
-## Input Modes (Hotbar Slots 1-8)
+## Input Modes (Hotbar Slots 1-9)
 
 Switch between modes by selecting different hotbar slots:
 
 | Slot | Mode | W | A | S | D | Jump (Space) |
 |------|------|---|---|---|---|--------------|
-| **1** | Mouse | Cursor Up | Cursor Left | Cursor Down | Cursor Right | Left Click |
+| **1** | Mouse (Fast) | Cursor Up | Cursor Left | Cursor Down | Cursor Right | Left Click |
 | **2** | Arrow Keys | ↑ | ← | ↓ | → | Enter |
 | **3** | System | ESC | F1 | F5 | F10 (Menu) | Space |
 | **4** | Windows | Alt+M (Max) | Alt+V (Tile V) | Alt+H (Tile H) | Ctrl+Alt+N (Next) | Ctrl+B (Border) |
@@ -50,6 +50,7 @@ Switch between modes by selecting different hotbar slots:
 | **6** | Terminal | Ctrl+Alt+T (New) | Tab | Shift+Tab | Ctrl+M (Menu) | Enter |
 | **7** | Text Nav | Page Up | Home | Page Down | End | Space |
 | **8** | Modifiers | Toggle Shift | Toggle Ctrl | Toggle Alt | Release All | Right Click |
+| **9** | Mouse (Slow) | Cursor Up (Slow) | Cursor Left (Slow) | Cursor Down (Slow) | Cursor Right (Slow) | Left Click |
 
 ## Commands
 
