@@ -1,0 +1,9 @@
+{
+    "Group": "SSquadTeam",
+    "Name": "TempleMaps",
+    "Main": "com.github.ssquadteam.templemaps.TempleMapsPlugin",
+    "Dependencies": {
+        "SSquadTeam:TaleLib": "*",
+        "SSquadTeam:VideoMaps": "*"
+    }
+}
