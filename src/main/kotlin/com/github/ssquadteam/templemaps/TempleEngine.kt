@@ -4,6 +4,8 @@ import Hardware.Video.GraphicsCardListener
 import Hardware.Keyboard.JPCKeyboardAdapter
 import Hardware.Mouse.JPCMouseAdapter
 import Main.Systems.AT386System
+import Main.Systems.AT486System
+import Main.Systems.ATX64System
 import Main.Systems.JPCSystem
 import java.awt.event.KeyEvent
 import java.io.File
@@ -40,6 +42,9 @@ class TempleEngine : GraphicsCardListener {
     private var frameData: IntArray? = null
 
     enum class BootType { CDROM, HDA, FDA }
+    enum class CpuProfile { X86_386, X86_486, X64 }
+
+    private var currentCpuProfile = CpuProfile.X86_386
 
     override fun onInit(frameData: IntArray, width: Int, height: Int) {
         this.frameData = frameData
@@ -55,7 +60,12 @@ class TempleEngine : GraphicsCardListener {
         }
     }
 
-    fun start(imagePath: String, bootType: BootType = BootType.HDA, ramMB: Int = 64): Boolean {
+    fun start(
+        imagePath: String,
+        bootType: BootType = BootType.HDA,
+        ramMB: Int = 64,
+        cpuProfile: CpuProfile = CpuProfile.X86_386
+    ): Boolean {
         if (running.get()) {
             return false
         }
@@ -67,15 +77,40 @@ class TempleEngine : GraphicsCardListener {
         }
 
         try {
-            println("[TempleMaps] Creating AT386 system with ${ramMB}MB RAM")
+            val sys = when (cpuProfile) {
+                CpuProfile.X86_386 -> {
+                    println("[TempleMaps] Creating AT386 system with ${ramMB}MB RAM")
+                    AT386System(this)
+                }
+                CpuProfile.X86_486 -> {
+                    println("[TempleMaps] Creating AT486 system with ${ramMB}MB RAM")
+                    AT486System(this)
+                }
+                CpuProfile.X64 -> {
+                    println("[TempleMaps] Creating AT x64 system with ${ramMB}MB RAM")
+                    ATX64System(this)
+                }
+            }
 
-            val sys = AT386System(this)
             system = sys
+            currentCpuProfile = cpuProfile
 
             keyAdapter = sys.keyAdapter
             mouseAdapter = sys.mouseAdapter
 
             sys.forEachConfiguration { category, configs ->
+                if (category == "CPU" && cpuProfile == CpuProfile.X64) {
+                    configs.forEach { config ->
+                        val label = config.label ?: ""
+                        if (label == "Execution") {
+                            try {
+                                config.setValue("decode")
+                            } catch (_: Exception) {
+                            }
+                        }
+                    }
+                }
+
                 if (category == "IDE Pri.") {
                     configs.forEach { config ->
                         val label = config.label ?: ""
@@ -120,6 +155,7 @@ class TempleEngine : GraphicsCardListener {
     }
 
     fun isRunning(): Boolean = running.get() && system?.isStopped != true
+    fun getCpuProfile(): CpuProfile = currentCpuProfile
 
     private fun convertToRGBA(argbPixels: IntArray): IntArray {
         val rgba = IntArray(argbPixels.size)

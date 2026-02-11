@@ -19,6 +19,7 @@ package Hardware.Control;
 
 import Hardware.CPU.Intel80386.Intel80386;
 import Hardware.CPU.Intel80386.MMU.MMU;
+import Hardware.CPU.X64.X64CPU;
 import Hardware.HardwareComponent;
 import Hardware.Speaker.Speaker;
 import Hardware.Timer.Intel8253;
@@ -44,6 +45,7 @@ public final class ControlPorts implements HardwareComponent,
     private Intel8253 m_pit;
     private MMU m_mmu;
     private Intel80386 m_cpu;
+    private X64CPU m_x64Cpu;
     
     
     
@@ -70,6 +72,9 @@ public final class ControlPorts implements HardwareComponent,
         
         if(component instanceof Intel80386)
             m_cpu = (Intel80386)component;
+
+        if(component instanceof X64CPU)
+            m_x64Cpu = (X64CPU)component;
     }
     
     // </editor-fold>
@@ -114,7 +119,8 @@ public final class ControlPorts implements HardwareComponent,
                 m_ctrlPortB = (m_ctrlPortB & 0x10) | (data & 0x03);
                 
                 // PIT timer 2 gate
-                m_pit.setCounterGate(2, (data & 0x01) != 0);
+                if(m_pit != null)
+                    m_pit.setCounterGate(2, (data & 0x01) != 0);
                 
                 // Speaker data
                 if(m_speaker != null)
@@ -125,11 +131,18 @@ public final class ControlPorts implements HardwareComponent,
                 m_ctrlPortA = data & 0x03;
                 
                 // Reset cpu
-                if((m_ctrlPortA & 0x01) != 0)
-                    m_cpu.reset();
+                if((m_ctrlPortA & 0x01) != 0) {
+                    if(m_cpu != null)
+                        m_cpu.reset();
+                    if(m_x64Cpu != null)
+                        m_x64Cpu.reset();
+                }
                 
                 // Set A20 Gate
-                m_mmu.setA20Gate((m_ctrlPortA & 0x02) != 0);
+                if(m_mmu != null)
+                    m_mmu.setA20Gate((m_ctrlPortA & 0x02) != 0);
+                if(m_x64Cpu != null)
+                    m_x64Cpu.setA20Gate((m_ctrlPortA & 0x02) != 0);
                 break;
                 
                 

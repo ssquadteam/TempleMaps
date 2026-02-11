@@ -21,6 +21,7 @@ import Main.UI.OutputPanel.JPCOutputPanel;
 import Main.UI.MenuBar.JPCMenuBar;
 import Main.Systems.AT386System;
 import Main.Systems.AT486System;
+import Main.Systems.ATX64System;
 import Main.Systems.JPCSystem;
 import Main.Systems.XTSystem;
 import Main.UI.Configuration.ToggleMenuItem;
@@ -177,6 +178,7 @@ public final class JPCWindow extends JFrame {
         systemMenu.addSystemHandler(XTSystem.SYSTEM_NAME, this::initSystem);
         systemMenu.addSystemHandler(AT386System.SYSTEM_NAME, this::initSystem);
         systemMenu.addSystemHandler(AT486System.SYSTEM_NAME, this::initSystem);
+        systemMenu.addSystemHandler(ATX64System.SYSTEM_NAME, this::initSystem);
         
         m_menuBar.updateUI();
     }
@@ -223,6 +225,10 @@ public final class JPCWindow extends JFrame {
 
                 case AT486System.SYSTEM_NAME:
                     system = new AT486System(m_outputPanel);
+                    break;
+
+                case ATX64System.SYSTEM_NAME:
+                    system = new ATX64System(m_outputPanel);
                     break;
 
                 default:

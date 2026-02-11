@@ -7,7 +7,7 @@ import com.github.ssquadteam.videomaps.MapDisplayManager
 import java.awt.event.KeyEvent
 import java.io.File
 
-class TempleCommand : TaleCommand("temple", "Run x86 OSes on the world map") {
+class TempleCommand : TaleCommand("temple", "Run x86/x64 OSes on the world map") {
 
     companion object {
         const val DISPLAY_ID = "temple_display"
@@ -28,9 +28,9 @@ class TempleCommand : TaleCommand("temple", "Run x86 OSes on the world map") {
     }
 
     override fun onExecute(ctx: TaleContext) {
-        ctx.reply("x86 Emulator Commands:".info())
+        ctx.reply("x86/x64 Emulator Commands:".info())
         ctx.reply("  /temple list - List available disk images".muted())
-        ctx.reply("  /temple start <image> - Start OS (e.g., win95, freedos)".muted())
+        ctx.reply("  /temple start <image> [cpu] - Start OS (cpu: x86, 486, x64, auto)".muted())
         ctx.reply("  /temple stop - Stop TempleOS".muted())
         ctx.reply("  /temple join - Join as player".muted())
         ctx.reply("  /temple leave - Leave session".muted())
@@ -44,6 +44,7 @@ class TempleCommand : TaleCommand("temple", "Run x86 OSes on the world map") {
 
     class StartCommand : TaleCommand("start", "Start an OS from disk image") {
         private val imageArg = stringArg("image", "Image filename (e.g., win95.img, freedos.iso)")
+        private val cpuArg = optionalString("cpu", "CPU profile: x86, 486, x64, auto")
 
         override fun onExecute(ctx: TaleContext) {
             val engine = TempleMapsPlugin.instance.engine
@@ -54,6 +55,7 @@ class TempleCommand : TaleCommand("temple", "Run x86 OSes on the world map") {
             }
 
             val imageName = ctx.get(imageArg)
+            val cpuArgValue = ctx.get(cpuArg)?.trim()?.lowercase()
             val imagesDir = File("mods/SSquadTeam_TempleMaps")
 
             var imageFile = File(imagesDir, imageName)
@@ -79,10 +81,30 @@ class TempleCommand : TaleCommand("temple", "Run x86 OSes on the world map") {
             }
 
             val ramMB = when {
+                imageName.contains("temple", ignoreCase = true) -> 256
                 imageName.contains("win95", ignoreCase = true) -> 480
                 imageName.contains("win98", ignoreCase = true) -> 512
                 imageName.contains("dos", ignoreCase = true) -> 64
                 else -> 256
+            }
+
+            val autoCpuProfile = when {
+                imageName.contains("temple", ignoreCase = true) -> TempleEngine.CpuProfile.X64
+                imageName.contains("win95", ignoreCase = true) -> TempleEngine.CpuProfile.X86_486
+                imageName.contains("win98", ignoreCase = true) -> TempleEngine.CpuProfile.X86_486
+                else -> TempleEngine.CpuProfile.X86_386
+            }
+
+            val cpuProfile = when (cpuArgValue) {
+                null, "", "auto" -> autoCpuProfile
+                "x86", "386", "i386" -> TempleEngine.CpuProfile.X86_386
+                "486", "i486", "x86_486" -> TempleEngine.CpuProfile.X86_486
+                "x64", "amd64", "x86_64", "64" -> TempleEngine.CpuProfile.X64
+                else -> {
+                    ctx.reply("Unknown CPU profile: $cpuArgValue".error())
+                    ctx.reply("Valid values: x86, 486, x64, auto".muted())
+                    return
+                }
             }
 
             if (!MapDisplayManager.exists(DISPLAY_ID)) {
@@ -95,10 +117,10 @@ class TempleCommand : TaleCommand("temple", "Run x86 OSes on the world map") {
                 }
             }
 
-            ctx.reply("Starting ${imageFile.name} (${bootType.name}, ${ramMB}MB RAM)...".info())
+            ctx.reply("Starting ${imageFile.name} (${bootType.name}, ${ramMB}MB RAM, CPU=${cpuProfile.name})...".info())
 
             try {
-                if (engine.start(imageFile.absolutePath, bootType, ramMB)) {
+                if (engine.start(imageFile.absolutePath, bootType, ramMB, cpuProfile)) {
                     Thread.sleep(1000)
 
                     MapDisplayManager.startAnimation(
@@ -209,6 +231,7 @@ class TempleCommand : TaleCommand("temple", "Run x86 OSes on the world map") {
 
             ctx.reply("Emulator Status:".info())
             ctx.reply("  Running: Yes".muted())
+            ctx.reply("  CPU: ${engine.getCpuProfile().name}".muted())
             ctx.reply("  Display: ${engine.displayWidth}x${engine.displayHeight}".muted())
             ctx.reply("  Mouse: (${engine.getMouseX()}, ${engine.getMouseY()})".muted())
 
